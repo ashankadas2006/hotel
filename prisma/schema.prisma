@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  name String
+  email String @unique
+  password String
+  role String @default("CUSTOMER") // CUSTOMER | OWNER
+  hotels Hotel[]
+  bookings Booking[]
+  reviews Review[]
+}
+model Hotel {
+  id Int @id @default(autoincrement())
+  name String
+  city String
+  description String @default("")
+  ownerId Int
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  rooms Room[]
+  reviews Review[]
+}
+model Room {
+  id Int @id @default(autoincrement())
+  hotelId Int
+  hotel Hotel @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  name String
+  type String // Single | Double | Suite | Deluxe
+  price Int
+  ac Boolean @default(true)
+  capacity Int @default(2)
+  bookings Booking[]
+}
+model Booking {
+  id Int @id @default(autoincrement())
+  userId Int
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roomId Int
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  checkIn DateTime
+  checkOut DateTime
+  total Int
+  paid Boolean @default(false)
+  status String @default("CONFIRMED") // CONFIRMED | CANCELLED
+  createdAt DateTime @default(now())
+}
+model Review {
+  id Int @id @default(autoincrement())
+  userId Int
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hotelId Int
+  hotel Hotel @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  rating Int
+  comment String
+  createdAt DateTime @default(now())
+}
